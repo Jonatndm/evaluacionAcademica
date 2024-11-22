@@ -1,6 +1,6 @@
 const express = require('express');
 const Database = require('./config/db');
-const estudiantesRoutes = require('./routes/estudiantesRoutes');
+const ReporterRoutes = require('./routes/ReporterRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -9,7 +9,7 @@ const app = express();
 });
 
 app.use(express.json());
-app.use('/estudiantes', estudiantesRoutes);
+app.use('/reporte', ReporterRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
