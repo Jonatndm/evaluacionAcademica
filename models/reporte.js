@@ -1,9 +1,17 @@
 const { ObjectId } = require('mongodb');
 const Database = require('../config/db');
-
+const cacheHelper = require('../Helper/cacheHelper')
 class Reporte {
   static async calcularPromedioEstudiante(studentId) {
     try {
+      const cacheKey = `reporte_promedio_estudiante_${studentId}`;
+      //Obtener datos desde redis
+      const cacheData = await cacheHelper.get(cacheKey);
+      if (cacheData) {
+        console.log("Reporte obtenido desde Redis");
+        return cacheData;
+      }
+
       const db = await Database.conectarDB();
       const resultado = await db.collection('Resultados').aggregate([
         {
@@ -39,7 +47,12 @@ class Reporte {
         }
       ]).toArray();
   
-      return resultado[0] || {promedio: 0};
+      const reporte = resultado[0] || {promedio: 0};
+
+      //almacenar en redis
+      await cacheHelper.set(cacheKey, reporte);
+      return reporte;
+
     } catch (error) {
       console.error("Error al calcular promedio por estudiante:", error);
       throw error;
@@ -48,6 +61,15 @@ class Reporte {
 
   static async calcularPromedioEvaluacion(evaluationId) {
     try {
+       const cacheKey = `reporte_promedio_evaluacion_${evaluationId}`;
+
+      //Obtener datos desde redis
+      const cacheData = await cacheHelper.get(cacheKey);
+      if (cacheData) {
+        console.log("Reporte obtenido desde Redis");
+        return cacheData;
+      }
+
       const db = await Database.conectarDB();
       const resultado = await db.collection('Resultados').aggregate([
         {
@@ -82,15 +104,29 @@ class Reporte {
           }
         }
       ]).toArray();
-      return resultado[0] || {promedio: 0};
+
+      const reporte = resultado[0] || null;
+      //almacenar en redis
+      await cacheHelper.set(cacheKey, reporte);
+      return reporte;
     }
     catch(error) {
-      console.error("Error al calcular promedio por evaluacion", error)
+      console.error("Error al calcular promedio por evaluacion", error);
+      throw error;
     }
   }
 
   static async calcularDesempeñoPorMateria(studentId) {
     try {
+      const cacheKey = `desempeno_materia_${studentId}`;
+
+      //Obtener datos desde redis
+      const cacheData = await cacheHelper.get(cacheKey);
+      if (cacheData) {
+        console.log("Reporte obtenido desde Redis");
+        return cacheData;
+      }
+
       const db = await Database.conectarDB();
       const resultado = await db.collection('Resultados').aggregate([
         { $match: { studentId: new ObjectId(studentId) } }, 
@@ -112,8 +148,10 @@ class Reporte {
           }
         }
       ]).toArray();
-
-      return resultado;
+      
+      const reporte = resultado;
+      await cacheHelper.set(cacheKey, reporte);
+      return reporte;
 
     } catch (error) {
       console.error("Error al calcular desempeño por materia:", error);
