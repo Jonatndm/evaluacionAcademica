@@ -77,7 +77,7 @@ class Reporte {
             promedioCalificacion: 1,
             totalEvaluaciones: 1,
             materia: "$informacionEvaluacion.Materia",
-            tipo: "$informacionEvaluacion.tipo",
+            tipoEvaluacion: "$informacionEvaluacion.tipo",
             fecha: "$informacionEvaluacion.fecha"
           }
         }
